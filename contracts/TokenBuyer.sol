@@ -6,7 +6,7 @@ import "hardhat/console.sol";
 
 contract TokenBuyer {
     uint256 public tokensSold;
-    ERC20Token erc20Token;
+    ERC20Token private erc20Token;
 
     event Buy(
         address indexed _recepient,

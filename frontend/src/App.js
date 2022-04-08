@@ -6,11 +6,11 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 import getBlockchain from "./Ethereum.js";
 import "bootstrap/dist/css/bootstrap.css";
 
-const startBuying = async ({ tokenBuyerContract, tokenBalance, ether,
+const startBuying = async ({ tokenBuyerContract, tokenBalance, erc20Tokens,
     setError, setTxs, setLeftPercentage }) => {
     try {
-        await tokenBuyerContract.deployed();
-        const buyTx = await tokenBuyerContract.buy(ether);
+        const buyTx = await tokenBuyerContract.buy(erc20Tokens);
+        await buyTx.wait();
         setTxs([buyTx]);
         let tokensSold = await tokenBuyerContract.tokensSold();
         setLeftPercentage(Math.round((tokenBalance - tokensSold) / tokenBalance * 100).toFixed(2));
@@ -20,7 +20,7 @@ const startBuying = async ({ tokenBuyerContract, tokenBalance, ether,
 };
 
 export default function App() {
-    const [leftPercentage, setLeftPercentage] = useState(100);
+    const [leftPercentage, setLeftPercentage] = useState(0);
     const [error, setError] = useState();
     const [txs, setTxs] = useState([]);
     const [tokenBuyerContract, setTokenBuyerContract] = useState(undefined);
@@ -32,6 +32,7 @@ export default function App() {
             setTokenBuyerContract(tokenBuyerContract);
             await tokenBuyerContract.deployed();
             setTokenBalance(await tokenBuyerContract.getERC20TokenBalance());
+            setLeftPercentage(100);
         };
         init();
         setError();
@@ -44,7 +45,7 @@ export default function App() {
         await startBuying({
             tokenBuyerContract,
             tokenBalance,
-            ether: BigNumber.from(data.get("ether")),
+            erc20Tokens: BigNumber.from(data.get("erc20Tokens")),
             setError,
             setTxs,
             setLeftPercentage
@@ -65,13 +66,13 @@ export default function App() {
                     <div className="">
                         <div className="my-3">
                             <div className="input-group w-25">
-                                <input name="ether" type="text" className="form-control" placeholder="Amount of ETH20Tokens" />
+                                <input name="erc20Tokens" type="text" className="form-control" placeholder="Amount of ETH20Tokens" />
                                 <div className="input-group-append">
                                     <button className="btn btn-primary" type="submit">Buy</button>
                                 </div>
                             </div>
                             <div className="my-3" >
-                                <p class="text-center">Total balance: {tokenBalance.toString()}</p>
+                                <p className="text-center">Total balance: {tokenBalance.toString()}</p>
                             </div>
                             <div className="my-3">
                                 <ProgressBar animated now={leftPercentage} label={`${leftPercentage}%`} />

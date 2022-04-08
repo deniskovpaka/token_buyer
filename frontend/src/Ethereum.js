@@ -13,6 +13,7 @@ const getBlockchain = () =>
                     TokenBuyer.abi,
                     signer
                 );
+                await tokenBuyerContract.deployed();
                 resolve({ tokenBuyerContract });
             }
             resolve({ tokenBuyerContract: undefined });
