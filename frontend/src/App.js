@@ -7,13 +7,12 @@ import getBlockchain from "./Ethereum.js";
 import "bootstrap/dist/css/bootstrap.css";
 
 const startBuying = async ({ tokenBuyerContract, tokenBalance, ether,
-    setError, setTxs, setTokensSold, setLeftPercentage }) => {
+    setError, setTxs, setLeftPercentage }) => {
     try {
         await tokenBuyerContract.deployed();
         const buyTx = await tokenBuyerContract.buy(ether);
         setTxs([buyTx]);
         let tokensSold = await tokenBuyerContract.tokensSold();
-        setTokensSold(tokensSold);
         setLeftPercentage(Math.round((tokenBalance - tokensSold) / tokenBalance * 100).toFixed(2));
     } catch (err) {
         setError(err.message);
@@ -24,7 +23,6 @@ export default function App() {
     const [leftPercentage, setLeftPercentage] = useState(100);
     const [error, setError] = useState();
     const [txs, setTxs] = useState([]);
-    const [tokensSold, setTokensSold] = useState(0);
     const [tokenBuyerContract, setTokenBuyerContract] = useState(undefined);
     const [tokenBalance, setTokenBalance] = useState(0);
 
@@ -49,7 +47,6 @@ export default function App() {
             ether: BigNumber.from(data.get("ether")),
             setError,
             setTxs,
-            setTokensSold,
             setLeftPercentage
         });
     };
@@ -66,30 +63,24 @@ export default function App() {
                         ETH20Token
                     </h1>
                     <div className="">
-                        <div className="my-4">
-                            <input
-                                name="ether"
-                                type="text"
-                                className="input input-bordered block w-full focus:ring focus:outline-none"
-                                placeholder="Amount in ETH20Token"
-                            />
+                        <div className="my-3">
+                            <div className="input-group w-25">
+                                <input name="ether" type="text" className="form-control" placeholder="Amount of ETH20Tokens" />
+                                <div className="input-group-append">
+                                    <button className="btn btn-primary" type="submit">Buy</button>
+                                </div>
+                            </div>
+                            <div className="my-3" >
+                                <p class="text-center">Total balance: {tokenBalance.toString()}</p>
+                            </div>
+                            <div className="my-3">
+                                <ProgressBar animated now={leftPercentage} label={`${leftPercentage}%`} />
+                                <font color="#0D6EFD">Available ERC20Tokens</font>
+                            </div>
                         </div>
                     </div>
                 </main>
                 <footer className="p-4 pt-1">
-                    <button
-                        type="submit"
-                        className="btn btn-primary submit-button focus:ring focus:outline-none w-full"
-                    >
-                        Buy tokens
-                    </button>
-                    <div className="my-3">
-                        Available ERC20Token's
-                        <ProgressBar animated now={leftPercentage} label={`${leftPercentage}%`} />
-                    </div>
-                    <div className="my-3">
-                        Total balance is {tokenBalance.toString()}, already sold {tokensSold.toString()}
-                    </div>
                     <ErrorMessage message={error} />
                     <TxList txs={txs} />
                 </footer>
